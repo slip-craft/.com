@@ -1,0 +1,442 @@
+<!DOCTYPE html>    
+<html lang="en">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">  
+<link rel="icon" sizes="32x32" href="#">  
+<link rel="icon" sizes="48x48" href="#">  
+<link rel="apple-touch-icon" href="#">  
+<link rel="manifest" href="manifest.json">  
+<meta name="theme-color" content="#000000">  
+<title>Dashboard</title>  
+  
+<style>  
+body {  
+  margin: 0;  
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;  
+  background: #000000;  
+  color: white;  
+}  
+  
+/* Search */  
+.search-box {  
+  position: fixed;  
+  top: 0;  
+  left: 0;  
+  width: 100%;  
+  height: 72px;  
+  background: transparent;  
+  backdrop-filter: blur(12px);  
+  display: flex;  
+  align-items: center;  
+  justify-content: center;  
+  z-index: 999;  
+  border-bottom: 1px solid rgba(255,255,255,0.04);  
+}  
+  
+.search-inner {  
+  width: 85%;  
+  max-width: 300px;  
+  background: #1e2329;  
+  border-radius: 16px;  
+  display: flex;  
+  align-items: center;  
+  padding: 0 14px;  
+  height: 45px;  
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);  
+}  
+  
+.search-inner svg {  
+  width: 18px;  
+  height: 18px;  
+  fill: none;  
+  stroke: #9aa4b2;  
+  stroke-width: 2;  
+}  
+  
+.search-inner input {  
+  flex: 1;  
+  background: transparent;  
+  border: none;  
+  outline: none;  
+  color: white;  
+  font-size: 15px;  
+  margin-left: 10px;  
+}  
+  
+/* Title */  
+.title {  
+  padding: 88px 16px 10px;  
+  font-size: 17.5px;  
+  font-weight: 600;  
+}  
+  
+/* List */  
+.product-list {  
+  padding: 10px 15px 120px;  
+}  
+  
+/* Card */  
+.product-card {  
+  display: flex;  
+  align-items: center;  
+  background: linear-gradient(180deg, #1f242b, #161b21);  
+  border-radius: 15px;  
+  padding: 15px 15px;  
+  margin-bottom: 10px;  
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 6px 12px rgba(0,0,0,0.6);  
+}  
+  
+.product-left {  
+  display: flex;  
+  align-items: center;  
+  gap: 14px;  
+  flex: 1;  
+}  
+  
+.product-icon {  
+  width: 56px;  
+  height: 56px;  
+  background: #2b3139;  
+  border-radius: 14px;  
+  overflow: hidden;  
+}  
+  
+.product-icon img {  
+  width: 100%;  
+  height: 100%;  
+  object-fit: cover;  
+}  
+  
+.product-name {  
+  font-size: 16px;  
+  font-weight: 600;  
+}  
+  
+.product-amount {  
+  font-size: 13px;  
+  color: #9aa4b2;  
+  margin-top: 4px;  
+}  
+  
+.product-arrow {  
+  font-size: 22px;  
+  color: #6b7280;  
+}  
+  
+/* FAB */  
+.fab {  
+  position: fixed;  
+  bottom: 20px;  
+  right: 20px;  
+  width: 50px;      /* smaller */  
+  height: 50px;     /* smaller */  
+  border-radius: 50%;  
+  border: none;  
+  font-size: 28px;  /* scaled to match */  
+  background: #ff7a00;  
+  color: black;  
+  box-shadow: 0 0 14px rgba(247,166,0,0.6);  
+  display: flex;  
+  align-items: center;  
+  justify-content: center;  
+}  
+  
+/* Modal */  
+.modal {  
+  display: none;  
+  position: fixed;  
+  inset: 0;  
+  background: rgba(0,0,0,.7);  
+  justify-content: center;  
+  align-items: center;  
+}  
+  
+.modal-content {  
+  background: #1e2329;  
+  padding: 20px;  
+  border-radius: 10px;  
+  width: 300px;  
+  display: flex;  
+  flex-direction: column;  
+  gap: 12px;  
+}  
+  
+.modal-content input {  
+  padding: 10px;  
+  border-radius: 6px;  
+  border: none;  
+  background: #2b3139;  
+  color: white;  
+}  
+  
+.modal-content button {  
+  padding: 10px;  
+  border-radius: 5px;  
+  border: none;  
+  background: #f7a600;  
+  font-weight: bold;  
+}  
+  
+#imageViewer {  
+  background: rgba(0,0,0,0.9);  
+}  
+  
+#imageViewer img {  
+  animation: zoomIn .2s ease;  
+}  
+  
+@keyframes zoomIn {  
+  from { transform: scale(.8); opacity: .5; }  
+  to { transform: scale(1); opacity: 1; }  
+}  
+</style>  
+</head>  
+  
+<body>  
+  
+<div class="search-box">  
+  <div class="search-inner">  
+    <svg viewBox="0 0 24 24">  
+      <path d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 1 1-14 0 7 7 0 0 1 14 0z"/>  
+    </svg>  
+    <input id="search" placeholder="Search products...">  
+  </div>  
+</div>  
+  
+<div class="title">My Products</div>  
+  
+<div id="productList" class="product-list"></div>  
+  
+<button class="fab" id="openModal">+</button>  
+  
+<!-- Add/Edit Modal -->  
+<div id="modal" class="modal">  
+  <div class="modal-content">  
+    <h3 id="modalTitle">Add Product</h3>  
+    <input type="file" id="productImage">  
+    <input type="text" id="productName" placeholder="Product name">  
+    <input type="number" id="productAmount" placeholder="Available product">  
+    <input type="number" id="productPrice" placeholder="Amount">  
+    <button id="saveProduct">Save</button>  
+  </div>  
+</div>  
+  
+<div id="emptyState" style="display:none; text-align:center; margin-top:100px;">  
+ <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-journal-bookmark" viewBox="0 0 16 16">  
+  <path fill-rule="evenodd" d="M6 8V1h1v6.117L8.743 6.07a.5.5 0 0 1 .514 0L11 7.117V1h1v7a.5.5 0 0 1-.757.429L9 7.083 6.757 8.43A.5.5 0 0 1 6 8"/>  
+  <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2"/>  
+  <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1z"/>  
+</svg>  
+  <div style="margin-top:20px; color:#9aa4b2;">No products saved yet</div>  
+</div>  
+  
+<!-- Delete Modal -->  
+<div id="deleteModal" class="modal">  
+  <div class="modal-content">  
+    <h3>Delete product?</h3>  
+    <button id="confirmDelete" style="background:red;color:white;">Yes</button>  
+    <button id="cancelDelete">No</button>  
+  </div>  
+</div>  
+  
+<!-- Image Viewer -->  
+<div id="imageViewer" class="modal">  
+  <div class="modal-content" style="background:transparent; box-shadow:none;">  
+    <img id="fullImage" style="max-width:90vw; max-height:90vh; border-radius:14px;">  
+  </div>  
+</div>  
+  
+<script>
+let db;
+let products = [];
+
+let editIndex = null;
+let deleteIndex = null;
+let lastTapTime = 0;
+let tapTimer = null;
+
+const productList = document.getElementById("productList");
+const modal = document.getElementById("modal");
+const deleteModal = document.getElementById("deleteModal");
+const imageViewer = document.getElementById("imageViewer");
+const fullImage = document.getElementById("fullImage");
+const emptyState = document.getElementById("emptyState");
+
+/* ========== DATABASE ========= */
+const request = indexedDB.open("ProductDB", 1);
+
+request.onupgradeneeded = e => {
+  const db = e.target.result;
+  db.createObjectStore("products", { keyPath: "id", autoIncrement: true });
+};
+
+request.onsuccess = e => {
+  db = e.target.result;
+  loadProducts();
+};
+
+function loadProducts() {
+  const tx = db.transaction("products", "readonly");
+  const store = tx.objectStore("products");
+  const req = store.getAll();
+  req.onsuccess = () => {
+    products = req.result;
+    renderProducts();
+  };
+}
+
+/* ========== RENDER ========= */
+function renderProducts(filter = "") {
+  productList.innerHTML = "";
+
+  const filtered = products.filter(p =>
+    p.name.toLowerCase().includes(filter.toLowerCase())
+  );
+
+  emptyState.style.display = filtered.length === 0 ? "block" : "none";
+
+  filtered.forEach((p, i) => {
+    const card = document.createElement("div");
+    card.className = "product-card";
+
+    const imgURL = URL.createObjectURL(p.image);
+
+    card.innerHTML = `
+      <div class="product-left">
+        <div class="product-icon">
+          <img src="${imgURL}">
+        </div>
+        <div>
+          <div class="product-name">${p.name}</div>
+          <div class="product-amount">Available products : ${p.amount}</div>
+          <div class="product-amount">Amount ₦ : ${p.price}</div>
+        </div>
+      </div>
+      <div class="product-arrow" style="cursor: none;">›</div>
+    `;
+
+    card.querySelector(".product-left").onclick = () => handleTap(p, i, imgURL);
+
+    card.querySelector(".product-arrow").onclick = e => {
+      e.stopPropagation();
+      editIndex = i;
+      openEdit(p);
+    };
+
+    productList.appendChild(card);
+  });
+}
+
+/* ========== TAP HANDLER ========= */
+function handleTap(product, index, imgURL) {
+  const now = Date.now();
+
+  if (now - lastTapTime < 300) {
+    clearTimeout(tapTimer);
+    lastTapTime = 0;
+    deleteIndex = index;
+    deleteModal.style.display = "flex";
+  } else {
+    lastTapTime = now;
+    tapTimer = setTimeout(() => {
+      fullImage.src = imgURL;
+      imageViewer.style.display = "flex";
+      lastTapTime = 0;
+    }, 300);
+  }
+}
+
+/* ========== EDIT ========= */
+function openEdit(product) {
+  modal.style.display = "flex";
+  modalTitle.innerText = "Edit Product";
+  productName.value = product.name;
+  productAmount.value = product.amount;
+  productPrice.value = product.price;
+  productImage.value = "";
+}
+
+/* ========== IMAGE VIEW ========= */
+imageViewer.onclick = () => {
+  imageViewer.style.display = "none";
+};
+
+/* ========== SEARCH ========= */
+search.oninput = e => renderProducts(e.target.value);
+
+/* ========== ADD ========= */
+openModal.onclick = () => {
+  editIndex = null;
+  modal.style.display = "flex";
+  modalTitle.innerText = "Add Product";
+  productName.value = "";
+  productAmount.value = "";
+  productPrice.value = "";
+  productImage.value = "";
+};
+
+/* ========== SAVE ========= */
+saveProduct.onclick = () => {
+  const name = productName.value.trim();
+  const amount = productAmount.value.trim();
+  const price = productPrice.value.trim();
+
+  if (!name || !amount || !price) return alert("Fill all fields");
+
+  const tx = db.transaction("products", "readwrite");
+  const store = tx.objectStore("products");
+
+  if (editIndex !== null) {
+    const item = products[editIndex];
+    item.name = name;
+    item.amount = amount;
+    item.price = price;
+
+    if (productImage.files[0]) {
+      item.image = productImage.files[0];
+    }
+
+    store.put(item);
+  } else {
+    const file = productImage.files[0];
+    if (!file) return alert("Select image");
+
+    store.add({
+      name,
+      amount,
+      price,
+      image: file
+    });
+  }
+
+  tx.oncomplete = () => {
+    modal.style.display = "none";
+    loadProducts();
+  };
+};
+
+/* ========== DELETE ========= */
+confirmDelete.onclick = () => {
+  const id = products[deleteIndex].id;
+  const tx = db.transaction("products", "readwrite");
+  tx.objectStore("products").delete(id);
+  tx.oncomplete = () => {
+    deleteModal.style.display = "none";
+    loadProducts();
+  };
+};
+
+cancelDelete.onclick = () => {
+  deleteModal.style.display = "none";
+};
+
+/* ========== CLOSE MODALS ========= */
+window.onclick = e => {
+  if (e.target === modal) modal.style.display = "none";
+  if (e.target === deleteModal) deleteModal.style.display = "none";
+};
+</script>
+  
+</body>  
+</html>

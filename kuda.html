@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">  
+<link rel="icon" sizes="32x32" href="#">  
+<link rel="icon" sizes="48x48" href="#">  
+<link rel="apple-touch-icon" href="#">  
+<link rel="manifest" href="manifest.json">  
+<meta name="theme-color" content="#000000">  
+    <title>Kuda Receipt Generator - Mobile View</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+/* --- GLOBAL RESET --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+}
+
+:root {
+    --kuda-purple: #40196d;
+    --text-dark: #121212;
+    --text-grey: #6b6b6b;
+    --border-light: #f1f1f1;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f8f9fb;
+    display: flex;
+    flex-direction: column; /* Stacks containers vertically */
+    align-items: center;
+    padding: 20px 10px;
+    gap: 20px;
+}
+
+/* --- ADJUSTED CONTAINER SIZES --- */
+.controls, #receipt-content {
+    width: 95%; /* Almost full screen width */
+    max-width: 500px; /* Limits size on very large tablets/desktops */
+    background: #fff;
+    border-radius: 16px;
+}
+
+/* --- RECEIPT CONTENT --- */
+#receipt-content {
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.kuda-logo {
+    font-weight: 800;
+    font-size: 20px;
+    color: var(--kuda-purple);
+}
+
+.header-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+.amount-section {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.amount-label {
+    font-size: 13px;
+    color: var(--text-grey);
+    margin-bottom: 5px;
+}
+
+.amount-value {
+    font-size: 18px;
+    font-weight: 800;
+    color: #000;
+}
+
+.row {
+    border-bottom: 1px solid var(--border-light);
+    padding: 16px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.label {
+    color: var(--text-grey);
+    font-size: 12px;
+    flex: 1;
+}
+
+.value {
+    text-align: right;
+    flex: 1.8;
+    font-size: 11px;
+    color: var(--text-dark);
+}
+
+.bold-val {
+    font-weight: 700;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.sub-val {
+    color: var(--text-grey);
+    font-size: 11px;
+    display: block;
+}
+
+.kuda-banner {
+    background-color: #f4f3ff;
+    border-radius: 12px;
+    padding: 15px;
+    margin-top: 25px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.k-icon {
+    background: none;
+    color: white;
+    font-weight: bold;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    flex-shrink: 0;
+}
+
+.banner-text {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--kuda-purple);
+    line-height: 1.3;
+}
+
+.legal-footer {
+    font-size: 9px;
+    color: #aaa;
+    text-align: center;
+    margin-top: 20px;
+    line-height: 1.4;
+    padding: 0 10px;
+}
+
+/* --- CONTROLS PANEL --- */
+.controls {
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.controls h2 {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: var(--kuda-purple);
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    font-size: 10px;
+    color: #777;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+button {
+    width: 100%;
+    background: var(--kuda-purple);
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: none;
+    margin-top: 10px;
+}
+</style>
+</head>
+<body>
+
+    <div class="controls">
+        <h2>Receipt Editor</h2>
+        
+        <div class="input-group">
+            <label>Amount (₦)</label>
+            <input type="text" id="i-amount" value="1,000,000.00">
+        </div>
+
+        <div class="input-group">
+            <label>Beneficiary Name</label>
+            <input type="text" id="i-rec-name" value="CHIAGOZIE KELVIN OKOLO">
+        </div>
+
+        <div class="input-group">
+            <label>Beneficiary Details</label>
+            <input type="text" id="i-rec-bank" value="Opay Digital Services Limited | 9136848006">
+        </div>
+
+        <div class="input-group">
+            <label>Sender Name</label>
+            <input type="text" id="i-sen-name" value="Ezeani David Uchenna">
+        </div>
+
+        <div class="input-group">
+            <label>Date & Time</label>
+            <input type="text" id="i-time" value="03 DEC 2025 09:01 AM">
+        </div>
+
+        <div class="input-group">
+            <label>Reference</label>
+            <input type="text" id="i-ref" value="090267251203080135976079978787">
+        </div>
+
+        <button onclick="generateImage()">Download Receipt Image</button>
+    </div>
+    
+    <div id="receipt-content">
+        <div class="header">
+            <div class="kuda-logo">
+    <img src="Kuda.png" alt="Kuda Logo" style="height: 55px; width: auto; display: block;">
+</div>
+            <div class="header-title">Transaction Details</div>
+        </div>
+
+        <div class="amount-section">
+            <p class="amount-label">Transaction Amount</p>
+            <p class="amount-value" id="d-amount">₦1,000,000.00</p>
+        </div>
+
+        <div class="row">
+            <span class="label">Beneficiary Details</span>
+            <span class="value">
+                <span class="bold-val" id="d-rec-name">CHIAGOZIE KELVIN OKOLO</span>
+                <span class="sub-val" id="d-rec-bank">Opay Digital Services Limited | 9136848006</span>
+            </span>
+        </div>
+
+        <div class="row">
+            <span class="label">Sender Details</span>
+            <span class="value">
+                <span class="bold-val" id="d-sen-name">Ezeani David Uchenna</span>
+                <span class="sub-val">Kuda | 2079978787</span>
+            </span>
+        </div>
+
+        <div class="row">
+            <span class="label">Paid On</span>
+            <span class="value" id="d-time">03 DEC 2025 09:01 AM</span>
+        </div>
+
+        <div class="row">
+            <span class="label">Fees</span>
+            <span class="value">₦0</span>
+        </div>
+
+        <div class="row">
+            <span class="label">Transaction Reference</span>
+            <span class="value" id="d-ref" style="word-break: break-all; font-family: monospace;">090267251203080135976079978787</span>
+        </div>
+
+        <div class="row" style="border:none">
+            <span class="label">Payment Type</span>
+            <span class="value">Outward Transfer</span>
+        </div>
+
+        <div class="kuda-banner">
+            <div class="k-icon"> <img src="Kuda-icon.png" alt="Kuda Logo" style="height: 100%; width: auto; display: block; border-radius: 10px;"></div>
+            <div class="banner-text">Not on Kuda? Tap here to download the money app for Africans</div>
+        </div>
+
+        <div class="legal-footer">
+            © 2026 Kuda Technologies Ltd (Company No. 11472232) All right reserves Nigerian banking service offered by Kuda microfinance bank (RC796975) with registered address at 1-11 Commercial avenue, Yaba, Lagos, Nigeria. Kuda microfinance Bank is license by the Central Bank of Nigeria deposites are insured by the Nigerian Deposit Insurance Corporation (NDIC)
+        </div>
+    </div>
+
+    <script>
+        function generateImage() {
+            // Sync values
+            document.getElementById('d-amount').innerText = "₦" + document.getElementById('i-amount').value;
+            document.getElementById('d-rec-name').innerText = document.getElementById('i-rec-name').value;
+            document.getElementById('d-rec-bank').innerText = document.getElementById('i-rec-bank').value;
+            document.getElementById('d-sen-name').innerText = document.getElementById('i-sen-name').value;
+            document.getElementById('d-time').innerText = document.getElementById('i-time').value;
+            document.getElementById('d-ref').innerText = document.getElementById('i-ref').value;
+
+            const target = document.getElementById('receipt-content');
+            
+            html2canvas(target, {
+                scale: 3, // High resolution
+                backgroundColor: "#ffffff",
+                logging: false
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Kuda_Transaction_Receipt.png';
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>

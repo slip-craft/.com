@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">  
+<link rel="icon" sizes="32x32" href="#">  
+<link rel="icon" sizes="48x48" href="#">  
+<link rel="apple-touch-icon" href="#">  
+<link rel="manifest" href="manifest.json">  
+<meta name="theme-color" content="#000000">  
+    <title>Ultimate Receipt Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+/* --- GLOBAL RESET --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased; /* Makes fonts look thinner/crisper */
+    -moz-osx-font-smoothing: grayscale;
+}
+
+:root {
+    --opay-green: #00b98d;
+    --text-dark: #333;
+    --text-light: #888;
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #eef2f3;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    padding: 40px 15px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--text-dark);
+}
+
+/* --- RECEIPT CONTENT --- */
+#receipt-content {
+    width: 375px; 
+    background-color: #fff;
+    
+    /* Adding the image background */
+    background-image: url('background.png'); 
+    background-size: cover;        /* Ensures image covers the whole receipt */
+    background-position: center;   /* Centers the image */
+    background-repeat: no-repeat;
+    
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    position: relative;
+    
+    /* Optional: This ensures the background image stays behind the text */
+    z-index: 1; 
+}
+
+
+.logo-text {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    width: 55px;
+    height: auto;
+    border: none;
+}
+
+.status-section {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.amount {
+    color: var(--opay-green);
+    font-size: 18px;
+    font-weight: 600; /* Semi-bold but not "chunky" */
+    margin-bottom: 5px;
+}
+
+.status-text {
+    font-size: 13px;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.timestamp {
+    font-size: 10px;
+    color: var(--text-light);
+}
+
+.divider {
+    border: none;
+    border-top: 1px solid #f2f2f2;
+    margin: 15px 0;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    font-size: 10px;
+}
+
+.label {
+    color: var(--text-light);
+    flex: 1;
+}
+
+.value {
+    text-align: right;
+    flex: 2;
+    color: #333;
+    word-break: break-word;
+}
+
+.bold-name {
+    font-weight: 600;
+    color: #000;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.footer-note {
+    font-size: 10px;
+    color: #999;
+    margin-top: 25px;
+    line-height: 1.5;
+    border-top: 0px dashed #eee;
+    padding-top: 15px;
+    text-align: justify;
+}
+
+/* --- CONTROLS PANEL --- */
+.controls {
+    width: 360px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    height: fit-content;
+}
+
+.controls h2 {
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+.input-group {
+    margin-bottom: 12px;
+}
+
+label {
+    display: block;
+    font-size: 11px;
+    margin-bottom: 4px;
+    color: #777;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 13px;
+    transition: border 0.2s;
+}
+
+input:focus {
+    border-color: var(--opay-green);
+    outline: none;
+}
+
+button {
+    background-color: var(--opay-green);
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    cursor: none;
+    font-weight: 600;
+    font-size: 14px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+</style>
+</head>
+<body>
+
+ <div class="controls">
+        <h2>Receipt Editor</h2>
+        
+        <div class="input-group">
+            <label>Amount</label>
+            <input type="text" id="i-amount" value="1,000,000.00">
+        </div>
+
+        <div class="input-group">
+            <label>Date & Time</label>
+            <input type="text" id="i-time" value="Feb 11th, 2026 20:39:53">
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <div class="input-group" style="flex:1">
+                <label>Rec. Name</label>
+                <input type="text" id="i-rec-name" value="Unknown Unknown Unknown">
+            </div>
+            <div class="input-group" style="flex:1">
+                <label>Rec. Bank</label>
+                <input type="text" id="i-rec-bank" value="Unknown">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>Recipient Account</label>
+            <input type="text" id="i-rec-acc" value="Unknown">
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <div class="input-group" style="flex:1">
+                <label>Sender Name</label>
+                <input type="text" id="i-sen-name" value="Ezeani David Uchenna">
+            </div>
+            <div class="input-group" style="flex:1">
+                <label>Sender Bank</label>
+                <input type="text" id="i-sen-bank" value="OPay">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>Sender Account</label>
+            <input type="text" id="i-sen-acc" value="810****734">
+        </div>
+
+        <div class="input-group">
+            <label>Transaction ID</label>
+            <input type="text" id="i-trans-id" value="260211010100104185272796">
+        </div>
+
+        <button onclick="generateImage()">Download Receipt Image</button>
+    </div>
+    
+    <div id="receipt-content">
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="logo-text">
+                <img src="Opay.webp" alt="Logo" class="logo">
+            </div>
+            <div style="font-size: 12px; font-weight: 600; color: #555;">Transaction Receipt</div>
+        </div>
+
+        <div class="status-section">
+            <div class="amount" id="d-amount">₦1,000,000.00</div>
+            <p class="status-text">Successful</p>
+            <p class="timestamp" id="d-time">Feb 11th, 2026 20:39:53</p>
+        </div>
+
+        <hr class="divider">
+
+        <div class="details">
+            <div class="row">
+                <span class="label">Recipient Details</span>
+                <span class="value">
+                    <span class="bold-name" id="d-rec-name">THERESA EZIAMAKA EZEANI</span>
+                    <span id="d-rec-bank">OPay</span> | <span id="d-rec-acc">806 758 9489</span>
+                </span>
+            </div>
+            <div class="row">
+                <span class="label">Sender Details</span>
+                <span class="value">
+                    <span class="bold-name" id="d-sen-name">OGECHUKWU DANIEL EZEANI</span>
+                    <span id="d-sen-bank">OPay</span> | <span id="d-sen-acc">810****734</span>
+                </span>
+            </div>
+            <div class="row">
+                <span class="label">Transaction No.</span>
+                <span class="value" id="d-trans-id" style="font-family: monospace; font-size: 11px;">260211010100104185272796</span>
+            </div>
+        </div>
+
+        <div class="footer-note">
+            Enjoy a better life with OPay. Get free transfers, withdrawals, bill payments, instant loans, and good annual interest on your savings. OPay is licensed by the Central Bank of Nigeria and insured by the NDIC.
+        </div>
+    </div>
+
+    <script>
+        function generateImage() {
+            // Update the display first
+            document.getElementById('d-amount').innerText = "₦" + document.getElementById('i-amount').value;
+            document.getElementById('d-time').innerText = document.getElementById('i-time').value;
+            document.getElementById('d-rec-name').innerText = document.getElementById('i-rec-name').value.toUpperCase();
+            document.getElementById('d-rec-bank').innerText = document.getElementById('i-rec-bank').value;
+            document.getElementById('d-rec-acc').innerText = document.getElementById('i-rec-acc').value;
+            document.getElementById('d-sen-name').innerText = document.getElementById('i-sen-name').value.toUpperCase();
+            document.getElementById('d-sen-bank').innerText = document.getElementById('i-sen-bank').value;
+            document.getElementById('d-sen-acc').innerText = document.getElementById('i-sen-acc').value;
+            document.getElementById('d-trans-id').innerText = document.getElementById('i-trans-id').value;
+
+            const receipt = document.getElementById('receipt-content');
+            html2canvas(receipt, {
+                scale: 2, // 2 is usually enough for high quality without huge file sizes
+                useCORS: true,
+                backgroundColor: "#ffffff"
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Receipt.png';
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
