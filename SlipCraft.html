@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">  
+<link rel="icon" sizes="32x32" href="#">  
+<link rel="icon" sizes="48x48" href="#">  
+<link rel="apple-touch-icon" href="#">  
+<link rel="manifest" href="manifest.json">  
+<meta name="theme-color" content="#000000">  
+<title>SlipCraft</title>
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    overflow: hidden;
+}
+
+#siteFrame {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+</style>
+</head>
+
+<body>
+
+<iframe id="siteFrame"></iframe>
+
+<script>
+window.onload = function() {
+    const urlToLoad = "https://slipcraft.net/dashboard"; // 👈 Put the website you want here
+    document.getElementById("siteFrame").src = urlToLoad;
+};
+</script>
+
+</body>
+</html>
